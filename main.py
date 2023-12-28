@@ -85,6 +85,9 @@ class MouseTracker:
 
     def on_click(self, x, y, button, pressed):
         """鼠标点击事件回调函数"""
+        if not self.is_tracking:
+            return
+
         mouse_controller = mouse.Controller()
         x, y = mouse_controller.position  # 解决坐标不一致的问题
         if pressed:

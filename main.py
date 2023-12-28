@@ -37,7 +37,7 @@ class ImageCache(object):
         '''
         Save the image
         Parameters:
-        - dirnam: the child dir name related to the python file parent dir for output
+        - dirname: the child dir name relative to the python file's parent dir for output
         - create_dir: whether to try creating or not
         - clean: whether to clean the cache or not
         '''

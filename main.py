@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from PIL import Image, ImageDraw
 import tkinter as tk
@@ -7,122 +8,128 @@ import datetime
 from pynput import mouse
 
 
-class MouseTracker:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Mouse Tracker")
+class Button(tk.Button):
+    def __init__(self, *args, **kwarges):
+        super(Button, self).__init__(*args, **kwarges)
+        self.pack(pady=10)
+        self['state'] = 'normal'
 
-        self.start_button = tk.Button(root, text="开始记录", command=self.start_tracking)
-        self.start_button.pack(pady=10)
+    def switch(self):
+        self['state'] = 'disable' if self['state'] == 'normal' else 'normal'
 
-        self.stop_button = tk.Button(root, text="停止记录", command=self.stop_tracking)
-        self.stop_button.pack(pady=10)
-        self.stop_button['state'] = 'disabled'
 
-        self.image = Image.new(
+class ImageCache(object):
+    '''Image Cache'''
+
+    def __init__(self, size: tuple[int, int]):
+        self._size = size
+        self._refresh()
+
+    @property
+    def cache(self):
+        return self._cache
+
+    def _refresh(self):
+        self._cache = Image.new(
             "RGBA",
-            (self.root.winfo_screenwidth(), self.root.winfo_screenheight()),
-            (0, 0, 0, 255)
+            self._size,
+            (0, 0, 0, 255),
         )
-        self.current_location = {"x": -1, "y": -1}
-        # 当前是否正在记录
-        self.is_tracking = False
-        # 创建鼠标监听器
-        self.mouse_listener = mouse.Listener(on_click=self.on_click)
+        self._draw = ImageDraw.Draw(self._cache)
 
-        self.mouse_listener.start()
+    def save(self, dirname='out', create_dir=True, clean=True):
+        dir_path = os.path.join(os.path.dirname(__file__), dirname)
+        if create_dir:
+            os.makedirs(dir_path, exist_ok=True)
+        elif not os.path.exists(dir_path):
+            raise FileNotFoundError
+
+        now = datetime.datetime.now()
+        file_path = os.path.join(
+            dir_path,
+            f'mouse_track-{now.year}-{now.month}-{now.day}-{now.hour}-{now.minute}-{now.second}.png',
+        )
+        self.cache.save(file_path)
+
+        if clean:
+            self._refresh()
+        print(f"轨迹图像已保存: {file_path}")
+
+    def line(self, start, end):
+        self._draw.line(xy=[start, end], fill=(255, 255, 255, 50), width=2)
+
+    def ellipse(self, x, y, color, radius=10):
+        self._draw.ellipse(
+            [(x - radius, y - radius), (x + radius, y + radius)],
+            fill=color,
+        )
+
+
+class Tracker(mouse.Listener):
+    '''Implemented by pynput.mouse
+    This `mouse.Listener` will create a thread.
+    '''
+
+    def __init__(self, size):
+        super(Tracker, self).__init__(on_move=self.on_move, on_click=self.on_click)
+        self.position = None  # (int(size[0] / 2), int(size[1] / 2))
+        self.cache = ImageCache(size=size)
+
+    def save(self):
+        self.cache.save()  # This will clean the cache
+
+    def on_move(self, x, y):
+        # print(f'moving {x},{y};')
+        position = (x, y)
+        if self.position:
+            self.cache.line(start=self.position, end=position)
+        self.position = position
+
+    def on_click(self, x, y, button, pressed):
+        if not pressed:
+            return
+        color = (
+            0 if button == mouse.Button.left else 255,
+            0 if button == mouse.Button.right else 255,
+            0,
+            100,
+        )
+        # print(f'click {x},{y}; {color}')
+        self.cache.ellipse(x, y, color=color)
+
+
+class App(tk.Tk):
+    def __init__(self):
+        super(App, self).__init__()
+        self.window_size = (self.winfo_screenwidth(), self.winfo_screenheight())
+
+        self.title("Mouse Tracker")
+
+        self.start_button = Button(self, text="开始记录", command=self.start_tracking)
+
+        self.stop_button = Button(self, text="停止记录", command=self.stop_tracking)
+        self.stop_button.switch()
+
+        self.tracker = Tracker(self.window_size)
 
     def start_tracking(self):
         """点击开始记录"""
-        self.start_button['state'] = 'disabled'
-        self.stop_button['state'] = 'normal'
-        self.is_tracking = True
-        # self.root.bind("<Button-1>", self.record_click)
-        Thread(target=self.track_mouse).start()
-        # 启动鼠标监听器
+        self.start_button.switch()
+        self.stop_button.switch()
+        self.tracker = Tracker(self.window_size)
+        self.tracker.start()
 
     def stop_tracking(self):
         """点击结束记录"""
-        self.stop_button['state'] = 'disabled'
-        self.create_image()
-        # self.mouse_listener.stop()
-        self.start_button['state'] = 'normal'
-        self.is_tracking = False
-        self.root.unbind("<Button-1>")
-        # 停止鼠标监听器
-
-    def clear_img(self):
-        """清除原有的图像层"""
-        self.image = Image.new(
-            "RGBA",
-            (self.root.winfo_screenwidth(), self.root.winfo_screenheight()),
-            (0, 0, 0, 255)
-        )
-
-    def track_mouse(self):
-        """开始记录后，此函数将开启另一个线程执行"""
-        mouse_controller = mouse.Controller()
-        while self.is_tracking:
-
-            x1, y1 = self.current_location["x"], self.current_location["y"]
-            # 获取新坐标
-            x2, y2 = mouse_controller.position
-            # 连线
-            if not (x1 == -1 and y1 == -1):
-                temp_image = Image.new(
-                    "RGBA",
-                    (self.root.winfo_screenwidth(), self.root.winfo_screenheight()),
-                    (0, 0, 0, 0)
-                )
-                draw = ImageDraw.Draw(temp_image)
-                draw.line([(x1, y1), (x2, y2)], fill=(255, 255, 255, 50), width=2)
-                self.image = Image.alpha_composite(self.image.convert("RGBA"), temp_image)
-            # 迭代更新坐标
-            self.current_location = {"x": x2, "y": y2}
-
-            pass
-        pass
-
-    def on_click(self, x, y, button, pressed):
-        """鼠标点击事件回调函数"""
-        if not self.is_tracking:
-            return
-
-        mouse_controller = mouse.Controller()
-        x, y = mouse_controller.position  # 解决坐标不一致的问题
-        if pressed:
-            print(x, y)
-            color = (0, 255, 0)  # 默认为绿色
-            if button == mouse.Button.right:
-                color = (255, 0, 0)  # 右键为红色
-            elif button == mouse.Button.middle:
-                color = (255, 255, 0)  # 中键为黄色
-            radius = 10
-
-            temp_image = Image.new(
-                "RGBA",
-                (self.root.winfo_screenwidth(), self.root.winfo_screenheight()),
-                (0, 0, 0, 0)
-            )
-            draw = ImageDraw.Draw(temp_image)
-            draw.ellipse([(x - radius, y - radius), (x + radius, y + radius)], fill=color + (100,))
-            self.image = Image.alpha_composite(self.image.convert("RGBA"), temp_image)
-
-    def create_image(self):
-        now = datetime.datetime.now()
-        if not (os.path.exists("out") and os.path.isdir("out")):
-            os.makedirs("out")
-        self.image.save(f"out/mouse_track-{now.year}-{now.month}-{now.day}-{now.hour}-{now.minute}-{now.second}.png")
-        print("轨迹图像已保存")
-        self.clear_img()
-
-        pass
+        self.stop_button.switch()
+        self.start_button.switch()
+        self.tracker.save()
+        self.tracker.stop()
 
 
 def main():
-    root = tk.Tk()
-    MouseTracker(root)
-    root.mainloop()
+    app = App()
+    app.mainloop()
 
 
 if __name__ == "__main__":

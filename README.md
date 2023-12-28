@@ -12,26 +12,26 @@
 
 绿点：鼠标左键点击位置，红色是右键，黄色是中键。
 
-![pycharm](imgs\pycharm.png)
+![pycharm](imgs/pycharm.png)
 
 上图是用pycharm开发后端大项目的时候，一上午大约三个半小时的记录，可以看到有很多细小的短横线反复划，那个地方可能是选中代码进行修改的地方。中间还能看到很多黄点，黄点表示鼠标中键点击进行代码跳转。
 
-![pycharm-datagrip](imgs\pycharm-datagrip.png)
+![pycharm-datagrip](imgs/pycharm-datagrip.png)
 
 上图是下午开发后端时候记录的，不同的是底部多了一些横线，那是我在用DataGrip软件连接后端数据库执行sql查询语句时候看结果，在底部显示了。
 
-![reading-pdf](imgs\reading-pdf.png)
+![reading-pdf](imgs/reading-pdf.png)
 
 上图是我阅读一本pdf的技术书，我没有想到我在阅读的时候屏幕竟然会不自觉的划出这么多横线，远远超出我的想象。
 
-![playing-minecraft](imgs\playing-minecraft.png)
+![playing-minecraft](imgs/playing-minecraft.png)
 
 上图是我打开Minecraft随便跑了5分钟的轨迹，实际上，在mc里，鼠标是不停的被吸附在中心点的。只有在打开箱子或者背包之类的时候，鼠标才不被吸附。
 
-![playing-game](imgs\playing-game.png)
+![playing-game](imgs/playing-game.png)
 
 上图是我在玩一个策略游戏《土地抢夺者》，一个需要不停的点击建筑，派遣部队攻城的小游戏。
 
-![movie-cut](imgs\movie-cut.png)
+![movie-cut](imgs/movie-cut.png)
 
 上图是我在用Pr进行视频剪辑，可以看到鼠标大多数基本都在时间轴附近移动，能明显看到两个横线，上面的横线是由于调整时间轴上的当前位置，下面的横线是裁剪和移动视频片段导致的。

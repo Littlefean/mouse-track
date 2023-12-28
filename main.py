@@ -2,7 +2,6 @@ import os
 
 from PIL import Image, ImageDraw
 import tkinter as tk
-from threading import Thread
 import datetime
 from pynput import mouse
 

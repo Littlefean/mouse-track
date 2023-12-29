@@ -18,7 +18,7 @@ class Button(tk.Button):
 
 class ImageCache(object):
     def __init__(self, size: tuple[int, int]):
-        '''Image Cache'''
+        """Image Cache"""
         self._size = size
         self._refresh()
 
@@ -34,13 +34,13 @@ class ImageCache(object):
         )
 
     def save(self, dirname='out', create_dir=True, clean=True):
-        '''
+        """
         Save the image
         Parameters:
         - dirname: the child dir name relative to the python file's parent dir for output
         - create_dir: whether to try creating or not
         - clean: whether to clean the cache or not
-        '''
+        """
         dir_path = os.path.join(os.path.dirname(__file__), dirname)
         if create_dir:
             os.makedirs(dir_path, exist_ok=True)
@@ -59,38 +59,43 @@ class ImageCache(object):
         print(f"轨迹图像已保存: {file_path}")
 
     def line(self, start, end):
-        '''
+        """
         Draw a line
         Parameters:
         - start: tuple of the line's start
         - end: tuple of the line's end
-        '''
+        """
         self._draw_transp_line(xy=[start, end], fill=(255, 255, 255, 50), width=2)
 
-    def ellipse(self, x, y, color, radius=10):
-        '''
+    def ellipse(self, x, y, color: tuple[int, int, int, int], radius=10):
+        """
         Draw a point at `(x, y)`
-        '''
-        self._draw_transp_ellipse(
+        :param x:
+        :param y:
+        :param color: 注意：有四个值，最后一个值的不透明度最大值是255，不是float的0~1
+        :param radius:
+        :return: None
+        """
+        self._draw_transparent_ellipse(
             [(x - radius, y - radius), (x + radius, y + radius)],
             fill=color,
         )
 
     def _draw_transp_line(self, xy, **kwargs):
-        '''Draws a line inside the given bounding box onto given image.
+        """Draws a line inside the given bounding box onto given image.
         Supports transparent colors
-        '''
+        """
         transp = Image.new('RGBA', self._size, (0, 0, 0, 0))  # Temp drawing image.
         draw = ImageDraw.Draw(transp, "RGBA")
         draw.line(xy, **kwargs)
         # Alpha composite two images together and replace first with result.
         self._cache.paste(Image.alpha_composite(self._cache, transp))
 
-    def _draw_transp_ellipse(self, xy, **kwargs):
-        '''Draws an ellipse inside the given bounding box onto given image.
+    def _draw_transparent_ellipse(self, xy, **kwargs):
+        """Draws an ellipse inside the given bounding box onto given image.
         Supports transparent colors
         https://stackoverflow.com/a/54426778
-        '''
+        """
         transp = Image.new('RGBA', self._size, (0, 0, 0, 0))  # Temp drawing image.
         draw = ImageDraw.Draw(transp, "RGBA")
         draw.ellipse(xy, **kwargs)
@@ -100,9 +105,9 @@ class ImageCache(object):
 
 class Tracker(mouse.Listener):
     def __init__(self, size):
-        '''Implemented by pynput.mouse
+        """Implemented by pynput.mouse
         This `mouse.Listener` will create a thread.
-        '''
+        """
         super(Tracker, self).__init__(on_move=self.on_move, on_click=self.on_click)
         self.position = None  # (int(size[0] / 2), int(size[1] / 2))
         self.cache = ImageCache(size=size)

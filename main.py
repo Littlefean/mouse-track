@@ -164,7 +164,7 @@ class App(tk.Tk):
         self.window_size = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         self.title("Mouse Tracker")
-        self.geometry("400x200")
+        self.geometry("400x400")
 
         self.start_button = Button(self, text="开始记录", command=self.start_tracking)
 
@@ -181,10 +181,10 @@ class App(tk.Tk):
                 "move_record": tk.BooleanVar(value=True),
             }
         )
-        self.checkbox1 = Checkbutton(self, text="记录左键点击位置", variable=self.tracker.settings['click_record']['left'])
-        self.checkbox2 = Checkbutton(self, text="记录右键点击位置", variable=self.tracker.settings['click_record']['right'])
-        self.checkbox3 = Checkbutton(self, text="记录中键点击位置", variable=self.tracker.settings['click_record']['middle'])
-        self.checkbox4 = Checkbutton(self, text="记录轨迹", variable=self.tracker.settings['move_record'])
+        Checkbutton(self, text="记录左键点击位置", variable=self.tracker.settings['click_record']['left'])
+        Checkbutton(self, text="记录右键点击位置", variable=self.tracker.settings['click_record']['right'])
+        Checkbutton(self, text="记录中键点击位置", variable=self.tracker.settings['click_record']['middle'])
+        Checkbutton(self, text="记录轨迹", variable=self.tracker.settings['move_record'])
 
     def start_tracking(self):
         """点击开始记录"""

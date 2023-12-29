@@ -16,6 +16,12 @@ class Button(tk.Button):
         self['state'] = 'disable' if self['state'] == 'normal' else 'normal'
 
 
+class Checkbutton(tk.Checkbutton):
+    def __init__(self, *args, **kwargs):
+        super(Checkbutton, self).__init__(*args, **kwargs)
+        self.pack(pady=2)
+
+
 class ImageCache(object):
     def __init__(self, size: tuple[int, int]):
         """Image Cache"""
@@ -104,18 +110,27 @@ class ImageCache(object):
 
 
 class Tracker(mouse.Listener):
-    def __init__(self, size):
+    def __init__(self, size, settings: dict):
         """Implemented by pynput.mouse
         This `mouse.Listener` will create a thread.
         """
         super(Tracker, self).__init__(on_move=self.on_move, on_click=self.on_click)
         self.position = None  # (int(size[0] / 2), int(size[1] / 2))
         self.cache = ImageCache(size=size)
+        self.settings = settings
 
     def save(self):
         self.cache.save()  # This will clean the cache
 
     def on_move(self, x, y):
+        """
+        鼠标移动的时触发
+        :param x: ---->
+        :param y: ↓
+        :return: None
+        """
+        if not self.settings['move_record'].get():
+            return
         # print(f'moving {x},{y};')
         position = (x, y)
         # WARNING remove this line if default set to mid of the screen for better perfomance
@@ -124,7 +139,14 @@ class Tracker(mouse.Listener):
         self.position = position
 
     def on_click(self, x, y, button, pressed):
+        print(self.settings)
         if not pressed:
+            return
+        if button == mouse.Button.left and not self.settings['click_record']['left'].get():
+            return
+        if button == mouse.Button.right and not self.settings['click_record']['right'].get():
+            return
+        if button == mouse.Button.middle and not self.settings['click_record']['middle'].get():
             return
         color = (
             0 if button == mouse.Button.left else 255,
@@ -142,19 +164,33 @@ class App(tk.Tk):
         self.window_size = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         self.title("Mouse Tracker")
+        self.geometry("400x200")
 
         self.start_button = Button(self, text="开始记录", command=self.start_tracking)
 
         self.stop_button = Button(self, text="停止记录", command=self.stop_tracking)
         self.stop_button.switch()
-
-        self.tracker = Tracker(self.window_size)
+        self.tracker = Tracker(
+            self.window_size,
+            {
+                "click_record": {
+                    "left": tk.BooleanVar(value=True),
+                    "right": tk.BooleanVar(value=True),
+                    "middle": tk.BooleanVar(value=True)
+                },
+                "move_record": tk.BooleanVar(value=True),
+            }
+        )
+        self.checkbox1 = Checkbutton(self, text="记录左键点击位置", variable=self.tracker.settings['click_record']['left'])
+        self.checkbox2 = Checkbutton(self, text="记录右键点击位置", variable=self.tracker.settings['click_record']['right'])
+        self.checkbox3 = Checkbutton(self, text="记录中键点击位置", variable=self.tracker.settings['click_record']['middle'])
+        self.checkbox4 = Checkbutton(self, text="记录轨迹", variable=self.tracker.settings['move_record'])
 
     def start_tracking(self):
         """点击开始记录"""
         self.start_button.switch()
         self.stop_button.switch()
-        self.tracker = Tracker(self.window_size)
+        self.tracker = Tracker(self.window_size, self.tracker.settings)
         self.tracker.start()
 
     def stop_tracking(self):

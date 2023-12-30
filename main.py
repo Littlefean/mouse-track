@@ -123,9 +123,10 @@ class MoveTracker(tk.BooleanVar):
         self.position = None
         self.cache = cache
 
-    def __call__(self, position: tuple[int, int]):
+    def track(self, x: int, y: int):
         if self.get():
-            print(f"move to ({position[0]}, {position[1]})")
+            print(f"move to ({x}, {y})")
+            position = (x, y)
             if self.position:
                 self.cache.line(start=self.position, end=position)
             self.position = position
@@ -139,7 +140,7 @@ class ClickTracker(tk.BooleanVar):
         self.color = color
         self.cache = cache
 
-    def __call__(self, x: int, y: int):
+    def track(self, x: int, y: int):
         if self.get():
             print(f"click at ({x}, {y})")
             self.cache.ellipse(x, y, color=self.color)
@@ -158,21 +159,14 @@ class Trackers(mouse.Listener):
         self.move_tracker = move_tracker
 
     def reset(self):
-        super(Trackers, self).__init__(on_move=self.on_move, on_click=self.on_click)
+        super(Trackers, self).__init__(on_move=self.on_move(), on_click=self.on_click)
 
-    def on_move(self, x, y):
-        """
-        鼠标移动的时触发
-        :param x: ---->
-        :param y: ↓
-        :return: None
-        """
-        self.move_tracker(position=(x, y))
+    def on_move(self):
+        return self.move_tracker.track
 
     def on_click(self, x, y, button, pressed):
         if pressed:
-            # print(f'click {x},{y}; {color}')
-            self.click_trackers[button](x, y)
+            self.click_trackers[button].track(x, y)
 
 
 class App(tk.Tk):

@@ -5,6 +5,16 @@ import tkinter as tk
 import datetime
 from pynput import mouse
 
+Position = tuple[int, int]
+Size = tuple[int, int]
+Color = tuple[int, int, int, int]
+
+
+class Colors:
+    Left = (0, 255, 0, 100)
+    Right = (255, 0, 0, 100)
+    Middle = (255, 255, 0, 100)
+
 
 class Button(tk.Button):
     def __init__(self, *args, **kwarges):
@@ -23,7 +33,7 @@ class Checkbutton(tk.Checkbutton):
 
 
 class ImageCache(object):
-    def __init__(self, size: tuple[int, int]):
+    def __init__(self, size: Size):
         """Image Cache"""
         self._size = size
         self._refresh()
@@ -64,7 +74,7 @@ class ImageCache(object):
             self._refresh()
         print(f"轨迹图像已保存: {file_path}")
 
-    def line(self, start, end):
+    def line(self, start: Position, end: Position):
         """
         Draw a line
         Parameters:
@@ -73,7 +83,7 @@ class ImageCache(object):
         """
         self._draw_transp_line(xy=[start, end], fill=(255, 255, 255, 50), width=2)
 
-    def ellipse(self, x, y, color: tuple[int, int, int, int], radius=10):
+    def ellipse(self, x, y, color: Color, radius=10):
         """
         Draw a point at `(x, y)`
         :param x:
@@ -88,7 +98,8 @@ class ImageCache(object):
         )
 
     def _draw_transp_line(self, xy, **kwargs):
-        """Draws a line inside the given bounding box onto given image.
+        """
+        Draws a line inside the given bounding box onto given image.
         Supports transparent colors
         """
         transp = Image.new("RGBA", self._size, (0, 0, 0, 0))  # Temp drawing image.
@@ -98,7 +109,8 @@ class ImageCache(object):
         self._cache.paste(Image.alpha_composite(self._cache, transp))
 
     def _draw_transparent_ellipse(self, xy, **kwargs):
-        """Draws an ellipse inside the given bounding box onto given image.
+        """
+        Draws an ellipse inside the given bounding box onto given image.
         Supports transparent colors
         https://stackoverflow.com/a/54426778
         """
@@ -109,23 +121,16 @@ class ImageCache(object):
         self._cache.paste(Image.alpha_composite(self._cache, transp))
 
 
-class Color:
-    Green = (0, 255, 0, 100)
-    Red = (255, 0, 0, 100)
-    Yellow = (255, 255, 0, 100)
-
-
 class MoveTracker(tk.BooleanVar):
-    """A worker that maintains a state of whether it should do something or not"""
-
     def __init__(self, cache: ImageCache):
+        """A tracker that maintains a state of whether it should track or not"""
         super(MoveTracker, self).__init__(value=True)
         self.position = None
         self.cache = cache
 
     def track(self, x: int, y: int):
         if self.get():
-            print(f"move to ({x}, {y})")
+            # print(f"move to ({x}, {y})")
             position = (x, y)
             if self.position:
                 self.cache.line(start=self.position, end=position)
@@ -133,16 +138,15 @@ class MoveTracker(tk.BooleanVar):
 
 
 class ClickTracker(tk.BooleanVar):
-    """A worker that maintains a state of whether it should do something or not"""
-
-    def __init__(self, cache: ImageCache, color: tuple[int, int, int, int]):
+    def __init__(self, cache: ImageCache, color: Color):
+        """A tracker that maintains a state of whether it should track or not"""
         super(ClickTracker, self).__init__(value=True)
         self.color = color
         self.cache = cache
 
     def track(self, x: int, y: int):
         if self.get():
-            print(f"click at ({x}, {y})")
+            # print(f"click at ({x}, {y})")
             self.cache.ellipse(x, y, color=self.color)
 
 
@@ -152,19 +156,21 @@ class Trackers(mouse.Listener):
         click_trackers: dict[mouse.Button, ClickTracker],
         move_tracker: MoveTracker,
     ):
-        """Implemented by pynput.mouse
-        This `mouse.Listener` will create a thread.
+        """
+        Implemented by pynput.mouse
+        The `mouse.Listener` will create a thread.
         """
         self.click_trackers = click_trackers
         self.move_tracker = move_tracker
 
     def reset(self):
-        super(Trackers, self).__init__(on_move=self.on_move(), on_click=self.on_click)
-
-    def on_move(self):
-        return self.move_tracker.track
+        """Reset the mouse listener"""
+        super(Trackers, self).__init__(
+            on_move=self.move_tracker.track, on_click=self.on_click
+        )
 
     def on_click(self, x, y, button, pressed):
+        """Pick the right tracker and track"""
         if pressed:
             self.click_trackers[button].track(x, y)
 
@@ -172,7 +178,6 @@ class Trackers(mouse.Listener):
 class App(tk.Tk):
     def __init__(self):
         super(App, self).__init__()
-        self.window_size = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         self.title("Mouse Tracker")
         self.geometry("400x400")
@@ -182,13 +187,17 @@ class App(tk.Tk):
         self.stop_button = Button(self, text="停止记录", command=self.stop_tracking)
         self.stop_button.switch()
 
-        self.cache = ImageCache(size=self.window_size)
+        self.cache = ImageCache(
+            size=(self.winfo_screenwidth(), self.winfo_screenheight())
+        )
 
         self.trackers = Trackers(
             click_trackers={
-                mouse.Button.left: ClickTracker(cache=self.cache, color=Color.Green),
-                mouse.Button.right: ClickTracker(cache=self.cache, color=Color.Red),
-                mouse.Button.middle: ClickTracker(cache=self.cache, color=Color.Yellow),
+                mouse.Button.left: ClickTracker(cache=self.cache, color=Colors.Left),
+                mouse.Button.right: ClickTracker(cache=self.cache, color=Colors.Right),
+                mouse.Button.middle: ClickTracker(
+                    cache=self.cache, color=Colors.Middle
+                ),
             },
             move_tracker=MoveTracker(self.cache),
         )

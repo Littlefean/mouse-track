@@ -199,22 +199,13 @@ class App(tk.Tk):
             move_tracker=MoveTracker(self.cache),
         )
 
-        Checkbutton(
-            self,
-            text="记录左键点击位置",
-            variable=self.trackers.click_trackers[mouse.Button.left],
-        )
-        Checkbutton(
-            self,
-            text="记录右键点击位置",
-            variable=self.trackers.click_trackers[mouse.Button.right],
-        )
-        Checkbutton(
-            self,
-            text="记录中键点击位置",
-            variable=self.trackers.click_trackers[mouse.Button.middle],
-        )
-        Checkbutton(self, text="记录轨迹", variable=self.trackers.move_tracker)
+        self.check_buttons = [
+            Checkbutton(self, text=text, variable=tracker)
+            for text, tracker in zip(
+                ["记录左键点击位置", "记录右键点击位置", "记录中键点击位置", "记录鼠标移动轨迹"],
+                [*self.trackers.click_trackers.values(), self.trackers.move_tracker],
+            )
+        ]
 
     def start_tracking(self):
         """点击开始记录"""

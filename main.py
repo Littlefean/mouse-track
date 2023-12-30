@@ -21,7 +21,6 @@ class Checkbutton(tk.Checkbutton):
         super(Checkbutton, self).__init__(*args, **kwargs)
         self.pack(pady=2)
 
-
 class ImageCache(object):
     def __init__(self, size: tuple[int, int]):
         """Image Cache"""
@@ -108,19 +107,49 @@ class ImageCache(object):
         # Alpha composite two images together and replace first with result.
         self._cache.paste(Image.alpha_composite(self._cache, transp))
 
+class Color:
+    Green = (0, 255, 0, 100)
+    Red = (255, 0, 0, 100)
+    Yellow = (255, 255, 0, 100)
 
-class Tracker(mouse.Listener):
-    def __init__(self, size, settings: dict):
+class MoveTracker(tk.BooleanVar):
+    """A worker that maintains a state of whether it should do something or not
+    """
+    def __init__(self, cache: ImageCache):
+        super(MoveTracker, self).__init__(value=True)
+        self.position = None
+        self.cache = cache
+
+    def __call__(self, position: tuple[int, int]):
+        if self.get():
+            print(f"move to ({position[0]}, {position[1]})")
+            if self.position:
+                self.cache.line(start=self.position, end=position)
+            self.position = position
+
+class ClickTracker(tk.BooleanVar):
+    """A worker that maintains a state of whether it should do something or not
+    """
+    def __init__(self, cache: ImageCache, color: tuple[int, int, int, int]):
+        super(ClickTracker, self).__init__(value=True)
+        self.color = color
+        self.cache = cache
+
+    def __call__(self, x: int, y: int):
+        if self.get():
+            print(f"click at ({x}, {y})")
+            self.cache.ellipse(x, y, color=self.color)
+
+class Trackers(mouse.Listener):
+    def __init__(self, click_trackers: dict[mouse.Button, ClickTracker], move_tracker: MoveTracker):
         """Implemented by pynput.mouse
         This `mouse.Listener` will create a thread.
         """
-        super(Tracker, self).__init__(on_move=self.on_move, on_click=self.on_click)
-        self.position = None  # (int(size[0] / 2), int(size[1] / 2))
-        self.cache = ImageCache(size=size)
-        self.settings = settings
+        self.click_trackers = click_trackers
+        self.move_tracker = move_tracker
 
-    def save(self):
-        self.cache.save()  # This will clean the cache
+    def reset(self):
+        super(Trackers, self).__init__(on_move=self.on_move, on_click=self.on_click)
 
     def on_move(self, x, y):
         """
@@ -129,34 +158,12 @@ class Tracker(mouse.Listener):
         :param y: ↓
         :return: None
         """
-        if not self.settings['move_record'].get():
-            return
-        # print(f'moving {x},{y};')
-        position = (x, y)
-        # WARNING remove this line if default set to mid of the screen for better perfomance
-        if self.position:
-            self.cache.line(start=self.position, end=position)
-        self.position = position
+        self.move_tracker(position = (x, y))
 
     def on_click(self, x, y, button, pressed):
-        print(self.settings)
-        if not pressed:
-            return
-        if button == mouse.Button.left and not self.settings['click_record']['left'].get():
-            return
-        if button == mouse.Button.right and not self.settings['click_record']['right'].get():
-            return
-        if button == mouse.Button.middle and not self.settings['click_record']['middle'].get():
-            return
-        color = (
-            0 if button == mouse.Button.left else 255,
-            0 if button == mouse.Button.right else 255,
-            0,
-            100,
-        )
-        # print(f'click {x},{y}; {color}')
-        self.cache.ellipse(x, y, color=color)
-
+        if pressed:
+            # print(f'click {x},{y}; {color}')
+            self.click_trackers[button](x, y)
 
 class App(tk.Tk):
     def __init__(self):
@@ -170,35 +177,36 @@ class App(tk.Tk):
 
         self.stop_button = Button(self, text="停止记录", command=self.stop_tracking)
         self.stop_button.switch()
-        self.tracker = Tracker(
-            self.window_size,
-            {
-                "click_record": {
-                    "left": tk.BooleanVar(value=True),
-                    "right": tk.BooleanVar(value=True),
-                    "middle": tk.BooleanVar(value=True)
-                },
-                "move_record": tk.BooleanVar(value=True),
-            }
+
+        self.cache = ImageCache(size=self.window_size)
+
+        self.trackers = Trackers(
+            click_trackers = {
+                mouse.Button.left: ClickTracker(cache=self.cache, color=Color.Green),
+                mouse.Button.right: ClickTracker(cache=self.cache, color=Color.Red),
+                mouse.Button.middle: ClickTracker(cache=self.cache, color=Color.Yellow),
+            },
+            move_tracker = MoveTracker(self.cache),
         )
-        Checkbutton(self, text="记录左键点击位置", variable=self.tracker.settings['click_record']['left'])
-        Checkbutton(self, text="记录右键点击位置", variable=self.tracker.settings['click_record']['right'])
-        Checkbutton(self, text="记录中键点击位置", variable=self.tracker.settings['click_record']['middle'])
-        Checkbutton(self, text="记录轨迹", variable=self.tracker.settings['move_record'])
+
+        Checkbutton(self, text="记录左键点击位置", variable=self.trackers.click_trackers[mouse.Button.left])
+        Checkbutton(self, text="记录右键点击位置", variable=self.trackers.click_trackers[mouse.Button.right])
+        Checkbutton(self, text="记录中键点击位置", variable=self.trackers.click_trackers[mouse.Button.middle])
+        Checkbutton(self, text="记录轨迹", variable=self.trackers.move_tracker)
 
     def start_tracking(self):
         """点击开始记录"""
         self.start_button.switch()
         self.stop_button.switch()
-        self.tracker = Tracker(self.window_size, self.tracker.settings)
-        self.tracker.start()
+        self.trackers.reset()
+        self.trackers.start()
 
     def stop_tracking(self):
         """点击结束记录"""
         self.stop_button.switch()
         self.start_button.switch()
-        self.tracker.save()
-        self.tracker.stop()
+        self.cache.save()
+        self.trackers.stop()
 
 
 def main():

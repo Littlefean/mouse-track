@@ -2,3 +2,6 @@
 mouse_track.png
 out/
 .vscode
+.venv
+pyrightconfig.json
+.DS_Store

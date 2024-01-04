@@ -14,6 +14,7 @@ class Colors:
     Left = (0, 255, 0, 100)
     Right = (255, 0, 0, 100)
     Middle = (255, 255, 0, 100)
+    Move = (255, 255, 255, 50)
 
 
 class Button(tk.Button):
@@ -74,14 +75,14 @@ class ImageCache(object):
             self._refresh()
         print(f"轨迹图像已保存: {file_path}")
 
-    def line(self, start: Position, end: Position):
+    def line(self, start: Position, end: Position, color=Colors.Move):
         """
         Draw a line
         Parameters:
         - start: tuple of the line's start
         - end: tuple of the line's end
         """
-        self._draw_transp_line(xy=[start, end], fill=(255, 255, 255, 50), width=2)
+        self._draw_transp_line(xy=[start, end], fill=color, width=2)
 
     def ellipse(self, x, y, color: Color, radius=10):
         """

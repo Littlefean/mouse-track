@@ -1,14 +1,13 @@
 import os
-from typing import Tuple, Dict
 
 from PIL import Image, ImageDraw
 import tkinter as tk
 import datetime
 from pynput import mouse
 
-Position = Tuple[int, int]
-Size = Tuple[int, int]
-Color = Tuple[int, int, int, int]
+Position = tuple[int, int]
+Size = tuple[int, int]
+Color = tuple[int, int, int, int]
 
 
 class Colors:
@@ -155,7 +154,7 @@ class ClickTracker(tk.BooleanVar):
 class Trackers(mouse.Listener):
     def __init__(
         self,
-        click_trackers: Dict[mouse.Button, ClickTracker],
+        click_trackers: dict[mouse.Button, ClickTracker],
         move_tracker: MoveTracker,
     ):
         """

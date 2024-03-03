@@ -1,4 +1,4 @@
-# 鼠标移动轨迹记录
+# <img src="assert/favicon.ico" alt="Custom Icon">鼠标移动轨迹记录
 
 一个好玩但没啥用的python迷你小程序：记录在做不同事情时候的鼠标运动轨迹。
 

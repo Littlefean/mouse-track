@@ -183,6 +183,7 @@ class App(tk.Tk):
 
         self.title("Mouse Tracker")
         self.geometry("400x400")
+        self.wm_iconbitmap('assert/favicon.ico')
 
         self.start_button = Button(self, text="开始记录", command=self.start_tracking)
 

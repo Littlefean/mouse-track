@@ -2,9 +2,8 @@ import tkinter as tk
 from pynput import mouse
 
 # 组件层
-from components.button import Button
-from components.input_range import InputRange
 from components.radio import Radio
+from components.switch_button import SwitchButton
 
 # 业务层
 from service.settings import Colors
@@ -28,10 +27,11 @@ class App(tk.Tk):
         )
 
         # 挂载组件
-        self.start_button = Button(self, text="开始记录", command=self.start_tracking)
-        self.stop_button = Button(self, text="停止记录", command=self.stop_tracking)
-        self.stop_button.switch()
-
+        self.switch_button = SwitchButton(
+            [self.start_tracking, self.stop_tracking],
+            ['开始记录', '结束记录'],
+            self
+        )
         self.cache = ImageCache(
             get_main_screen_size()
         )
@@ -62,15 +62,11 @@ class App(tk.Tk):
 
     def start_tracking(self):
         """点击开始记录"""
-        self.start_button.switch()
-        self.stop_button.switch()
         self.trackers.reset()
         self.trackers.start()
 
     def stop_tracking(self):
         """点击结束记录"""
-        self.stop_button.switch()
-        self.start_button.switch()
         self.cache.save()
         self.trackers.stop()
 

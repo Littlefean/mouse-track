@@ -23,6 +23,9 @@ class App(tk.Tk):
         self.title("Mouse Tracker")
         self.geometry("400x400")
         self.wm_iconbitmap('assert/favicon.ico')
+        self.config(
+            background='#2e3e26',
+        )
 
         # 挂载组件
         self.start_button = Button(self, text="开始记录", command=self.start_tracking)
@@ -33,10 +36,10 @@ class App(tk.Tk):
             get_main_screen_size()
         )
 
-        label = tk.Label(self, text="线条不透明度（%）:")
-        label.pack(side="left", padx=10, pady=20)
-        self.line_opacity_value = tk.IntVar()
-        self.line_opacity = InputRange(from_=0, to=100, variable=self.line_opacity_value, orient="horizontal")
+        # label = tk.Label(self, text="线条不透明度（%）:")
+        # label.pack(side="left", padx=10, pady=20)
+        # self.line_opacity_value = tk.IntVar()
+        # self.line_opacity = InputRange(from_=0, to=100, variable=self.line_opacity_value, orient="horizontal")
 
         self.trackers = Trackers(
             click_trackers={

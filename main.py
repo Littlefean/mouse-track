@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from pynput import mouse
 
@@ -13,6 +14,11 @@ from service.move_tracker import MoveTracker
 from service.trackers import Trackers
 # 通用工具层
 from utils.get_screen_size import get_main_screen_size
+
+
+def open_out_folder():
+    """打开输出图片的位置"""
+    os.startfile(os.path.dirname("./out"))
 
 
 class App(tk.Tk):
@@ -31,6 +37,9 @@ class App(tk.Tk):
             [self.start_tracking, self.stop_tracking],
             ['开始记录', '结束记录'],
             self
+        )
+        self.open_out_files = SwitchButton(
+            [open_out_folder], ['打开out文件夹']
         )
         self.cache = ImageCache(
             get_main_screen_size()

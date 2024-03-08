@@ -21,7 +21,7 @@ class SwitchButton(tk.Button):
     def __init__(self, command_list: List[Callable], text_list: List[str], *args, **kwargs):
         """
 
-        :param command_list: 需要将每一个状态写成一个数组
+        :param command_list: 每一个状态的点击触发函数 组成的数组
         :param text_list: 需要将每一个状态对应的按钮名称写成一个数组
         :param args:
         :param kwargs:
@@ -42,16 +42,16 @@ class SwitchButton(tk.Button):
         self.config(
             bg='#b8e3a3',
             fg='black',
-            text=self.text_list[self.click_count % 2],
+            text=self.text_list[0],
             command=self.onclick
         )
 
     def onclick(self):
-        current_index = self.click_count % 2
+        current_index = self.click_count % len(self.command_list)
         self.command_list[current_index]()
 
         self.click_count += 1
 
-        self.config(text=self.text_list[self.click_count % 2])
+        self.config(text=self.text_list[self.click_count % len(self.command_list)])
 
     pass

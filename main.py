@@ -12,6 +12,8 @@ from service.image_cache import ImageCache
 from service.click_tracker import ClickTracker
 from service.move_tracker import MoveTracker
 from service.trackers import Trackers
+# 通用工具层
+from utils.get_screen_size import get_main_screen_size
 
 
 class App(tk.Tk):
@@ -28,7 +30,7 @@ class App(tk.Tk):
         self.stop_button.switch()
 
         self.cache = ImageCache(
-            size=(self.winfo_screenwidth(), self.winfo_screenheight())
+            get_main_screen_size()
         )
 
         label = tk.Label(self, text="线条不透明度（%）:")

@@ -19,6 +19,10 @@ class ImageCache(object):
         return self._cache
 
     def _refresh(self):
+        """
+        将内部的绘制图片重置为一个纯黑色图片
+        :return:
+        """
         self._cache = Image.new(
             "RGBA",
             self._size,

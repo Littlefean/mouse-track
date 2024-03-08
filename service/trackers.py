@@ -7,11 +7,10 @@ from service.move_tracker import MoveTracker
 
 
 class Trackers(mouse.Listener):
-    def __init__(
-            self,
-            click_trackers: Dict[mouse.Button, ClickTracker],
-            move_tracker: MoveTracker,
-    ):
+    def __init__(self,
+                 click_trackers: Dict[mouse.Button, ClickTracker],
+                 move_tracker: MoveTracker
+                 ):
         """
         Implemented by pynput.mouse
         The `mouse.Listener` will create a thread.

@@ -32,7 +32,6 @@ class SwitchButton(tk.Button):
         if len(command_list) != len(text_list):
             raise Exception('状态列表长度和状态列表名称长度不相等')
 
-        self.pack(pady=10)
         self.click_count = 0
         self.text_list = text_list
 
@@ -45,6 +44,8 @@ class SwitchButton(tk.Button):
             text=self.text_list[0],
             command=self.onclick
         )
+        self.pack(pady=10)
+        # self.grid(row=3, column=0, padx=20, pady=20)
 
     def onclick(self):
         current_index = self.click_count % len(self.command_list)

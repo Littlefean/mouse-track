@@ -15,3 +15,4 @@ class Radio(tk.Checkbutton):
             activeforeground='#b8e3a3',
         )
         self.pack(pady=2)
+        # self.grid(row=1, column=0, padx=20, pady=20)

@@ -53,14 +53,14 @@ class ImageCache(object):
             self._refresh()
         print(f"轨迹图像已保存: {file_path}")
 
-    def line(self, start: Position, end: Position, color=Colors.Move):
+    def line(self, start: Position, end: Position, color=Colors.Move, width=2):
         """
         Draw a line
         Parameters:
         - start: tuple of the line's start
         - end: tuple of the line's end
         """
-        self._draw_transp_line(xy=[start, end], fill=color, width=2)
+        self._draw_transp_line(xy=[start, end], fill=color, width=width)
 
     def ellipse(self, x, y, color: Color, radius=10):
         """

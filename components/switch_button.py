@@ -26,6 +26,7 @@ class SwitchButton(tk.Button):
         :param args:
         :param kwargs:
         """
+        kwargs["cursor"] = "hand2"
         super(SwitchButton, self).__init__(*args, **kwargs)
         if not command_list or not text_list:
             raise Exception('状态列表长度不能为0')

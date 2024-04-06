@@ -49,7 +49,7 @@ class App(tk.Tk):
 
         self.line_width_value = tk.IntVar(value=2)
         self.line_width = InputRange(
-            '线条不透明度（实时）',
+            '线条宽度（实时）',
             variable=self.line_width_value,
             from_=1,
             to=25,

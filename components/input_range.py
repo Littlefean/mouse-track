@@ -31,7 +31,11 @@ class InputRange(tk.Frame):
             bg='#2e3e26',
             highlightbackground='#2e3e26',  # 隐藏白色边框
             activebackground='#7fff00',  # 设置滑动条在悬停状态下的背景颜色为浅绿色
-            troughcolor='#006400'  # 设置滑动条的条内背景颜色为深绿色
+            troughcolor='#006400',  # 设置滑动条的条内背景颜色为深绿色
+            # sliderrelief=tk.FLAT,  # 设置滑块的边框样式为 flat
+            sliderlength=20,  # 设置滑块的长度为 30（增加滑块的宽度）
+            # width=20,  # 设置轨道的宽度为 20
+            length=200,
         )
         self.scale.pack(side=tk.LEFT)
 

@@ -21,7 +21,8 @@ class Trackers(mouse.Listener):
     def reset(self):
         """Reset the mouse listener"""
         super(Trackers, self).__init__(
-            on_move=self.move_tracker.track, on_click=self.on_click
+            on_move=self.move_tracker.on_move,
+            on_click=self.on_click
         )
 
     def on_click(self, x, y, button, pressed):

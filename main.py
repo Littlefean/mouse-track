@@ -52,7 +52,7 @@ class App(tk.Tk):
             '线条不透明度（实时）',
             variable=self.line_width_value,
             from_=1,
-            to=15,
+            to=25,
         )
 
         self.trackers = Trackers(

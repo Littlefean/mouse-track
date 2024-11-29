@@ -19,6 +19,7 @@ import subprocess
 import sys
 
 from tkinter import messagebox
+from PIL import Image, ImageTk
 
 
 def open_out_folder():
@@ -43,7 +44,12 @@ class App(tk.Tk):
         # 配置ui信息
         self.title("Mouse Tracker")
         self.geometry("400x400")
-        self.wm_iconbitmap('assert/favicon.ico')
+        icon_path = './assert/a952d-5afjj.icns'
+        if sys.platform.startswith("darwin"):
+            icon_image = ImageTk.PhotoImage(Image.open(icon_path))
+            self.iconphoto(True, icon_image)
+        else:
+            self.wm_iconbitmap('./assert/favicon.ico')
         self.config(
             background='#2e3e26',
         )

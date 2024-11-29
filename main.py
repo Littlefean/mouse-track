@@ -15,11 +15,25 @@ from service.move_tracker import MoveTracker
 from service.trackers import Trackers
 # 通用工具层
 from utils.get_screen_size import get_main_screen_size
+import subprocess
+import sys
+
+from tkinter import messagebox
 
 
 def open_out_folder():
     """打开输出图片的位置"""
-    os.startfile(os.path.dirname("./out"))
+    out_path = os.path.dirname("./out")
+    if sys.platform.startswith("darwin"):
+        subprocess.run(['open', out_path])
+    elif sys.platform.startswith("win32"):
+        os.startfile(out_path)
+    elif sys.platform.startswith("win64"):
+        os.startfile(out_path)
+    elif sys.platform.startswith("linux"):
+        subprocess.run(['xdg-open', out_path])
+    else:
+        messagebox.showinfo("提示", "无法打开文件夹，请手动打开")
 
 
 class App(tk.Tk):
